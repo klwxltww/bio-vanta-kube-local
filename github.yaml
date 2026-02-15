@@ -1,0 +1,27 @@
+name: Deploy to Local K8s
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    # สำคัญมาก! บรรทัดนี้บอกให้รันบนเครื่องเรา ไม่ใช่ Cloud
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # - name: Build Docker Image
+    #   run: |
+    #     docker build -t my-app:latest .
+    #     # ใน Local K8s ไม่ต้อง push ขึ้น Registry ก็ได้ ถ้าใช้ imagePullPolicy: Never
+
+    - name: Update Kubernetes
+      run: |
+        # คำสั่งนี้จะรันบนเครื่องเราโดยตรง จึงใช้ kubectl ได้เลย
+        kubectl apply -f deployment-v2.yaml
+        kubectl rollout restart deployment/my-web-deployment
+        
+    - name: Verify
+      run: kubectl get pods
